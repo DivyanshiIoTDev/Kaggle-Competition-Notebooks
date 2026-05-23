@@ -26,3 +26,24 @@ LightGBM
 MLP
 Neural Networks
 TensorFlow / PyTorch
+
+🏆 Kaggle Achievements & Badges
+
+I have actively participated in Kaggle competitions, notebook development, and community learning, earning the following Kaggle badges:
+
+🎖️ Achieved Kaggle Badges
+Getting Started Competitor
+Playground Competitor
+Python Coder
+Kaggle Community Member
+7 Day Login Streak
+
+
+These badges reflect my engagement in:
+
+Machine Learning competitions
+Python-based notebook development
+Kaggle community participation
+Continuous learning and consistency in data science
+
+I regularly explore datasets, build predictive models, perform feature engineering, and experiment with machine learning workflows to strengthen my practical AI and data science skills.
