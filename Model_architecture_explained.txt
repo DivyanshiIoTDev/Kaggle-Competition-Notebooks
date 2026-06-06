@@ -1,0 +1,255 @@
+DEMAND PREDICTION APPROACH
+
+1. DATA LOADING AND INITIAL EXPLORATION
+
+The training and test datasets were loaded using Pandas. Initial exploratory analysis was performed to understand:
+
+* Dataset dimensions
+* Feature data types
+* Missing values
+* Distribution of the target variable (Demand)
+* Correlation among numerical features
+
+A correlation heatmap was generated to identify potentially important numerical predictors.
+
+2. DATA PREPROCESSING
+
+Missing Value Handling:
+
+* Missing values in RoadType were replaced with "Other".
+* Missing values in Weather were replaced with "Others".
+* Missing values in Temperature were imputed using the average temperature corresponding to the same phase of the day.
+
+This preserved temporal temperature patterns while handling incomplete records.
+
+3. TIMESTAMP FEATURE ENGINEERING
+
+The timestamp column was converted to datetime format and the hour component was extracted.
+
+Timestamp -> Hour
+
+The relationship between hour and demand was analyzed using joint plots.
+
+Phase of Day Creation:
+
+Based on traffic demand patterns, the day was divided into four periods:
+
+* Night (00:00 – 05:59)
+* Morning (06:00 – 11:59)
+* Afternoon (12:00 – 17:59)
+* Evening (18:00 – 23:59)
+
+A new feature called "phase_of_day" was created to capture broader temporal demand trends.
+
+4. BINARY FEATURE ENCODING
+
+Landmarks:
+
+* Yes -> 1
+* No -> 0
+
+Large Vehicles:
+
+* Allowed -> 1
+* Not Allowed -> 0
+
+This simplified model learning while preserving useful information.
+
+5. GEOSPATIAL FEATURE ENGINEERING
+
+Geohash Decoding:
+
+The geohash feature was decoded into geographic coordinates using the PyGeoHash library.
+
+Geohash -> Latitude + Longitude
+
+This generated two new features:
+
+* Latitude (lat)
+* Longitude (lon)
+
+These features provided precise spatial information.
+
+6. TARGET ENCODING OF HIGH-CARDINALITY FEATURES
+
+Geohash Target Encoding:
+
+Since geohash contained a large number of unique values, target encoding was applied.
+
+Encoded Value = Mean Demand for that Geohash
+
+This transformed a high-cardinality categorical feature into a numerical feature while preserving demand information.
+
+Weather Target Encoding:
+
+Weather categories were target encoded using average demand values.
+
+RoadType Target Encoding:
+
+Road types were similarly target encoded based on mean demand values.
+
+This reduced dimensionality while capturing category-specific demand behavior.
+
+7. SPATIAL CLUSTERING
+
+To capture regional demand patterns, K-Means clustering was performed on latitude and longitude coordinates.
+
+The optimal number of clusters was determined through clustering analysis and K = 21 was selected.
+
+A new feature called "geo_cluster" was generated.
+
+This feature grouped nearby locations into common traffic-demand zones.
+
+8. ADDITIONAL TEMPORAL FEATURES
+
+Two cyclical time features were created:
+
+* hour_sin
+* hour_cos
+
+These were generated using sine and cosine transformations of the hour.
+
+These features capture the cyclical nature of time and allow the model to understand that 23:00 and 00:00 are temporally close.
+
+9. DATA SPLITTING
+
+The dataset was divided into:
+
+* Training Set
+* Validation Set
+* Test Set
+
+This enabled model development, tuning, and evaluation.
+
+10. XGBOOST REGRESSION
+
+The primary prediction model was XGBoost Regressor configured for regression using:
+
+objective = reg:squarederror
+
+11. HYPERPARAMETER OPTIMIZATION
+
+RandomizedSearchCV was used for automated hyperparameter tuning.
+
+The following parameters were optimized:
+
+* n_estimators
+* max_depth
+* learning_rate
+* min_child_weight
+* subsample
+* colsample_bytree
+* gamma
+* reg_alpha
+* reg_lambda
+
+The best-performing configuration was selected based on cross-validation RMSE.
+
+12. FEATURE IMPORTANCE ANALYSIS
+
+Feature importance scores were analyzed using XGBoost.
+
+The most influential features included:
+
+* Temperature
+* Latitude
+* Longitude
+* Hour
+* Geo Cluster
+* Weather
+* Number of Lanes
+
+This helped identify useful predictors and remove less informative features.
+
+13. FEATURE SELECTION
+
+Multiple feature combinations were evaluated.
+
+Experiments were conducted with and without:
+
+* Index
+* Geohash
+
+to determine their impact on model performance.
+
+The final feature set retained the variables that produced the best validation performance.
+
+14. MODEL EVALUATION
+
+The regression models were evaluated using:
+
+* Mean Absolute Error (MAE)
+* Mean Squared Error (MSE)
+* Root Mean Squared Error (RMSE)
+* R² Score
+
+The final models achieved strong validation performance with high R² and low RMSE.
+
+15. ENSEMBLE MODEL DEVELOPMENT
+
+Three gradient boosting algorithms were trained independently on the engineered feature set.
+
+A. XGBoost Regressor
+
+XGBoost was used to capture complex nonlinear relationships and feature interactions. Hyperparameters were optimized using RandomizedSearchCV.
+
+B. LightGBM Regressor
+
+LightGBM was trained to leverage its efficient leaf-wise tree growth strategy and ability to handle large datasets with high predictive performance.
+
+C. CatBoost Regressor
+
+CatBoost was used to capture additional patterns in the data and improve model diversity. Its ordered boosting mechanism helps reduce prediction bias and performs effectively on structured tabular datasets.
+
+16. ENSEMBLE STRATEGY
+
+Predictions from the three models were combined using an averaging ensemble approach.
+
+Final Prediction = (XGBoost Prediction + LightGBM Prediction + CatBoost Prediction) / 3
+
+The ensemble approach was chosen because different boosting algorithms capture different patterns in the data. Averaging their predictions reduces variance and improves generalization on unseen data.
+
+17. PREDICTION GENERATION
+
+The ensemble model was applied to the processed test dataset.
+
+Predicted demand values were generated for all test instances.
+
+A submission file was created in the required format:
+
+Index,demand
+
+and exported as:
+
+submission2.csv
+
+for leaderboard evaluation.
+
+18. ADDITIONAL EXPERIMENTS
+
+The following techniques were also explored:
+
+* CatBoost Regressor
+* LightGBM Regressor
+* Geo-Hour interaction features
+* Ensemble modeling
+
+to investigate further improvements in leaderboard performance.
+
+CONCLUSION
+
+FINAL SUBMISSION PIPELINE
+
+1. Data Cleaning and Missing Value Handling
+2. Timestamp Feature Extraction
+3. Phase of Day Creation
+4. Binary Encoding of Landmarks and Large Vehicles
+5. Geohash Decoding into Latitude and Longitude
+6. Target Encoding of Geohash, Weather, and RoadType
+7. K-Means Spatial Clustering to Generate Geo Cluster Features
+8. Feature Engineering and Feature Selection
+9. Training of XGBoost, LightGBM, and CatBoost Models
+10. Ensemble Prediction using Model Averaging
+11. Generation of Final Submission File
+
+This approach combines temporal analysis, geospatial feature engineering, target encoding, clustering techniques, and an ensemble of three state-of-the-art gradient boosting models to accurately predict traffic demand.
